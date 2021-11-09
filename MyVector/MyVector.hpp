@@ -494,6 +494,55 @@ std::string* my_vector::insert(std::string* pos, const_reference value)
     }
 }
 
+std::string* my_vector::insert(std::string* pos, const std::string* b, const std::string* e)
+{
+    try
+    {
+        if (pos < m_begin || pos > m_last_alloc)
+            throw "[ERROR] Position is out of the container interval(\"my_vector::insert\")";
+        
+        if (b == e)
+            return nullptr;
+
+        if ((capacity() - size()) > e - b)
+        {
+            if (pos == m_last_alloc)
+            {
+                for(auto track = b; track != e; ++track)
+                    push_back(*track);
+                
+                return pos;
+            }
+            else
+            {
+                for(auto count = 0U; count < (e - b); ++count)
+                    push_back("");
+                
+                auto regress = m_last_alloc - 1;
+
+                for(; regress - (e - b) != pos - 1; --regress)
+                    swap(regress - (e - b), regress);
+
+                auto aux = (regress - (e - b)) + 1;
+
+                for(auto count = 0U; count < (e - b); ++count)
+                    *(aux + count) = *(b + count);
+
+                return aux;
+            }
+        }
+    }
+    catch(const char* excp)
+    {
+        std::cerr << excp << '\n';
+
+        free();
+        exit(EXIT_FAILURE);
+    }
+
+    return nullptr;
+}
+
 //////// Non-member functions //////////////
 
 inline bool operator == (const my_vector& obj1, const my_vector& obj2)
