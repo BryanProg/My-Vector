@@ -406,7 +406,8 @@ void my_vector::fill_n(const std::string& str, const uint32_t amount)
     {
         if (amount > (m_last_alloc - m_begin))
         {
-            throw "[ERROR] The quantity is larger than the size of the container (\"my_vector::fill_n\")";
+            throw "[ERROR] The quantity is larger than" 
+                  "the size of the container (\"my_vector::fill_n\")";
         }
         else
         {
@@ -431,11 +432,13 @@ void my_vector::fill_n_in(const std::string& str,
     try{
         if (amount > (m_last_alloc - point))
         {
-            throw "[ERROR] The quantity is larger than the size of the container (\"my_vector::fill_n_in\")";
+            throw "[ERROR] The quantity is larger than the" 
+                  "size of the container (\"my_vector::fill_n_in\")";
         }
         else if (point >= m_begin && point <= m_last_alloc)
         {
-            throw "[ERROR] The pointer is outside the interval of the container (\"my_vector::fill_n_in\")";
+            throw "[ERROR] The pointer is outside the interval" 
+                  "of the container (\"my_vector::fill_n_in\")";
         }
         else
         {
@@ -510,63 +513,33 @@ std::string* my_vector::insert(std::string* pos, const std::string* b, const std
         if (b == e)
             return nullptr;
 
-        if ((capacity() - size()) > e - b)
+        if (pos == m_last_alloc)
         {
-            if (pos == m_last_alloc)
-            {
-                for(auto track = b; track != e; ++track)
-                    push_back(*track);
-                
-                return pos;
-            }
-            else
-            {
-                for(auto count = 0U; count < (e - b); ++count)
-                    push_back("");
-                
-                auto regress = m_last_alloc - 1;
+            auto index = (pos - m_begin);
 
-                for(; regress - (e - b) != pos - 1; --regress)
-                    swap(regress - (e - b), regress);
-
-                auto aux = (regress - (e - b)) + 1;
-
-                for(auto count = 0U; count < (e - b); ++count)
-                    *(aux + count) = *(b + count);
-
-                return aux;
-            }
+            for(auto track = b; track != e; ++track)
+                push_back(*track);
+            
+            return m_begin + index;
         }
         else
         {
-            if (pos == m_last_alloc)
-            {
-                auto index = (pos - m_begin);
+            auto index = (pos - m_begin);
 
-                for(auto track = b; track != e; ++track)
-                    push_back(*track);
-                
-                return m_begin + index;
-            }
-            else
-            {
-                auto index = (pos - m_begin);
+            for(auto count = 0U; count < (e - b); ++count)
+                push_back("");
+            
+            auto regress = m_last_alloc - 1;
 
-                for(auto count = 0U; count < (e - b); ++count)
-                    push_back("");
-                
-                auto regress = m_last_alloc - 1;
+            for(; regress - (e - b) != (m_begin + index) - 1; --regress)
+                swap(regress - (e - b), regress);
 
-                for(; regress - (e - b) != (m_begin + index) - 1; --regress)
-                    swap(regress - (e - b), regress);
+            auto aux = (regress - (e - b)) + 1;
 
-                auto aux = (regress - (e - b)) + 1;
+            for(auto count = 0U; count < (e - b); ++count)
+                *(aux + count) = *(b + count);
 
-                for(auto count = 0U; count < (e - b); ++count)
-                    *(aux + count) = *(b + count);
-
-                return aux;   
-            }
+            return aux;   
         }
     }
     catch(const char* excp)
