@@ -492,6 +492,8 @@ std::string* my_vector::insert(std::string* pos, const_reference value)
         free();
         exit(EXIT_FAILURE);
     }
+
+    return nullptr;
 }
 
 std::string* my_vector::insert(std::string* pos, const std::string* b, const std::string* e)
@@ -501,6 +503,10 @@ std::string* my_vector::insert(std::string* pos, const std::string* b, const std
         if (pos < m_begin || pos > m_last_alloc)
             throw "[ERROR] Position is out of the container interval(\"my_vector::insert\")";
         
+        if (b > e)
+            throw "[ERROR] The supplied range is invalid," 
+                  "start can not be higher than final(\"my_vector::insert\")";
+
         if (b == e)
             return nullptr;
 
@@ -529,6 +535,37 @@ std::string* my_vector::insert(std::string* pos, const std::string* b, const std
                     *(aux + count) = *(b + count);
 
                 return aux;
+            }
+        }
+        else
+        {
+            if (pos == m_last_alloc)
+            {
+                auto index = (pos - m_begin);
+
+                for(auto track = b; track != e; ++track)
+                    push_back(*track);
+                
+                return m_begin + index;
+            }
+            else
+            {
+                auto index = (pos - m_begin);
+
+                for(auto count = 0U; count < (e - b); ++count)
+                    push_back("");
+                
+                auto regress = m_last_alloc - 1;
+
+                for(; regress - (e - b) != (m_begin + index) - 1; --regress)
+                    swap(regress - (e - b), regress);
+
+                auto aux = (regress - (e - b)) + 1;
+
+                for(auto count = 0U; count < (e - b); ++count)
+                    *(aux + count) = *(b + count);
+
+                return aux;   
             }
         }
     }
