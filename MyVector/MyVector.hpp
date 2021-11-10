@@ -96,8 +96,8 @@ class my_vector : public vector_base
         inline void clear() noexcept;
 
         inline std::string* insert(std::string*, const_reference);
-        inline std::string* insert(std::string*, const std::string*, const std::string*);// insert a range
-        inline std::string* insert(std::string*, std::initializer_list<std::string>);// insert a list
+        inline std::string* insert(std::string*, const std::string*, const std::string*);
+        inline std::string* insert(std::string*, std::initializer_list<std::string>);
 
     private:
         static std::allocator<std::string> alloc;
@@ -551,6 +551,11 @@ std::string* my_vector::insert(std::string* pos, const std::string* b, const std
     }
 
     return nullptr;
+}
+
+std::string* my_vector::insert(std::string* pos, std::initializer_list<std::string> il)
+{
+    return insert(pos, il.begin(), il.end());
 }
 
 //////// Non-member functions //////////////
