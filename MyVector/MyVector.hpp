@@ -594,6 +594,53 @@ inline std::string* my_vector::erase(std::string* pos)
     }
 }
 
+inline std::string* my_vector::erase(std::string* b, std::string* e)
+{
+    try
+    {
+        if (empty())
+            throw "[ERROR] Not possible to erase an empty vector(\"my_vector::erase\")";
+
+        if (b < m_begin || e > m_last_alloc)
+            throw "[ERROR] The interval is not valid(\"my_vector::erase\")";
+
+        if (b > e)
+            throw "[ERROR] The supplied range is invalid,"
+                  "start can not be higher than final(\"my_vector::erase\")";
+        
+        if (b == e)
+            return nullptr;
+
+        if (b == m_begin && e == m_last_alloc)
+        {
+            free();
+            return nullptr;
+        }
+        else
+        {
+            auto save_b = b;
+            auto track  = e;
+
+            for(; track != m_last_alloc; ++track, ++save_b)
+                swap(track, save_b);
+
+            for (; m_last_alloc != save_b;)
+                alloc.destroy(--m_last_alloc);
+            
+            return m_last_alloc;
+        }
+    }
+    catch(const char* excp)
+    {
+        std::cerr << excp << '\n';
+
+        free();
+        exit(EXIT_FAILURE);
+    }
+
+    return nullptr;
+}
+
 //////// Non-member functions //////////////
 
 inline bool operator == (const my_vector& obj1, const my_vector& obj2)
