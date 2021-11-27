@@ -99,6 +99,9 @@ class my_vector : public vector_base
         inline std::string* insert(std::string*, const std::string*, const std::string*);
         inline std::string* insert(std::string*, std::initializer_list<std::string>);
 
+        inline std::string* erase(std::string*);
+        inline std::string* erase(std::string*, std::string*);        
+
     private:
         static std::allocator<std::string> alloc;
 
@@ -556,6 +559,39 @@ std::string* my_vector::insert(std::string* pos, const std::string* b, const std
 std::string* my_vector::insert(std::string* pos, std::initializer_list<std::string> il)
 {
     return insert(pos, il.begin(), il.end());
+}
+
+inline std::string* my_vector::erase(std::string* pos)
+{
+    try
+    {
+        if (pos < m_begin || pos >= m_last_alloc)
+            throw "[ERROR] Position is out of the container interval(\"my_vector::erase\")";
+        
+        if (pos == m_last_alloc - 1)
+        {
+            alloc.destroy(--m_last_alloc);
+            return m_last_alloc;
+        }
+        else
+        {
+            auto track = pos;
+
+            for (; track != m_last_alloc - 1; ++track)
+                swap(track, track + 1);
+            
+            alloc.destroy(--m_last_alloc);
+
+            return track;
+        }
+    }
+    catch(const char* excp)
+    {
+        std::cerr << excp << '\n';
+
+        free();
+        exit(EXIT_FAILURE);
+    }
 }
 
 //////// Non-member functions //////////////
