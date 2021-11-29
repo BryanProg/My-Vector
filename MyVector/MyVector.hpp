@@ -582,7 +582,7 @@ inline std::string* my_vector::erase(std::string* pos)
             
             alloc.destroy(--m_last_alloc);
 
-            return track;
+            return pos;
         }
     }
     catch(const char* excp)
@@ -627,7 +627,7 @@ inline std::string* my_vector::erase(std::string* b, std::string* e)
             for (; m_last_alloc != save_b;)
                 alloc.destroy(--m_last_alloc);
             
-            return m_last_alloc;
+            return b;
         }
     }
     catch(const char* excp)
@@ -637,8 +637,6 @@ inline std::string* my_vector::erase(std::string* b, std::string* e)
         free();
         exit(EXIT_FAILURE);
     }
-
-    return nullptr;
 }
 
 //////// Non-member functions //////////////
