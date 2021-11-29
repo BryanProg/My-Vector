@@ -96,8 +96,11 @@ class my_vector : public vector_base
         inline void clear() noexcept;
 
         inline std::string* insert(std::string*, const_reference);
-        inline std::string* insert(std::string*, const std::string*, const std::string*);// insert a range
-        inline std::string* insert(std::string*, std::initializer_list<std::string>);// insert a list
+        inline std::string* insert(std::string*, const std::string*, const std::string*);
+        inline std::string* insert(std::string*, std::initializer_list<std::string>);
+
+        inline std::string* erase(std::string*);
+        inline std::string* erase(std::string*, std::string*);        
 
     private:
         static std::allocator<std::string> alloc;
@@ -406,7 +409,8 @@ void my_vector::fill_n(const std::string& str, const uint32_t amount)
     {
         if (amount > (m_last_alloc - m_begin))
         {
-            throw "[ERROR] The quantity is larger than the size of the container (\"my_vector::fill_n\")";
+            throw "[ERROR] The quantity is larger than" 
+                  "the size of the container (\"my_vector::fill_n\")";
         }
         else
         {
@@ -431,11 +435,13 @@ void my_vector::fill_n_in(const std::string& str,
     try{
         if (amount > (m_last_alloc - point))
         {
-            throw "[ERROR] The quantity is larger than the size of the container (\"my_vector::fill_n_in\")";
+            throw "[ERROR] The quantity is larger than the" 
+                  "size of the container (\"my_vector::fill_n_in\")";
         }
         else if (point >= m_begin && point <= m_last_alloc)
         {
-            throw "[ERROR] The pointer is outside the interval of the container (\"my_vector::fill_n_in\")";
+            throw "[ERROR] The pointer is outside the interval" 
+                  "of the container (\"my_vector::fill_n_in\")";
         }
         else
         {
@@ -488,6 +494,145 @@ std::string* my_vector::insert(std::string* pos, const_reference value)
     catch(const char* excp)
     {
         std::cerr << '\n' << excp << '\n';
+
+        free();
+        exit(EXIT_FAILURE);
+    }
+
+    return nullptr;
+}
+
+std::string* my_vector::insert(std::string* pos, const std::string* b, const std::string* e)
+{
+    try
+    {
+        if (pos < m_begin || pos > m_last_alloc)
+            throw "[ERROR] Position is out of the container interval(\"my_vector::insert\")";
+        
+        if (b > e)
+            throw "[ERROR] The supplied range is invalid," 
+                  "start can not be higher than final(\"my_vector::insert\")";
+
+        if (b == e)
+            return nullptr;
+
+        if (pos == m_last_alloc)
+        {
+            auto index = (pos - m_begin);
+
+            for(auto track = b; track != e; ++track)
+                push_back(*track);
+            
+            return m_begin + index;
+        }
+        else
+        {
+            auto index = (pos - m_begin);
+
+            for(auto count = 0U; count < (e - b); ++count)
+                push_back("");
+            
+            auto regress = m_last_alloc - 1;
+
+            for(; regress - (e - b) != (m_begin + index) - 1; --regress)
+                swap(regress - (e - b), regress);
+
+            auto aux = (regress - (e - b)) + 1;
+
+            for(auto count = 0U; count < (e - b); ++count)
+                *(aux + count) = *(b + count);
+
+            return aux;   
+        }
+    }
+    catch(const char* excp)
+    {
+        std::cerr << excp << '\n';
+
+        free();
+        exit(EXIT_FAILURE);
+    }
+
+    return nullptr;
+}
+
+std::string* my_vector::insert(std::string* pos, std::initializer_list<std::string> il)
+{
+    return insert(pos, il.begin(), il.end());
+}
+
+inline std::string* my_vector::erase(std::string* pos)
+{
+    try
+    {
+        if (pos < m_begin || pos >= m_last_alloc)
+            throw "[ERROR] Position is out of the container interval(\"my_vector::erase\")";
+        
+        if (pos == m_last_alloc - 1)
+        {
+            alloc.destroy(--m_last_alloc);
+            return m_last_alloc;
+        }
+        else
+        {
+            auto track = pos;
+
+            for (; track != m_last_alloc - 1; ++track)
+                swap(track, track + 1);
+            
+            alloc.destroy(--m_last_alloc);
+
+            return pos;
+        }
+    }
+    catch(const char* excp)
+    {
+        std::cerr << excp << '\n';
+
+        free();
+        exit(EXIT_FAILURE);
+    }
+}
+
+inline std::string* my_vector::erase(std::string* b, std::string* e)
+{
+    try
+    {
+        if (empty())
+            throw "[ERROR] Not possible to erase an empty vector(\"my_vector::erase\")";
+
+        if (b < m_begin || e > m_last_alloc)
+            throw "[ERROR] The interval is not valid(\"my_vector::erase\")";
+
+        if (b > e)
+            throw "[ERROR] The supplied range is invalid,"
+                  "start can not be higher than final(\"my_vector::erase\")";
+        
+        if (b == e)
+            return nullptr;
+
+        if (b == m_begin && e == m_last_alloc)
+        {
+            free();
+            return nullptr;
+        }
+        else
+        {
+            auto save_b = b;
+            auto track  = e;
+
+            for(; track != m_last_alloc; ++track, ++save_b)
+                swap(track, save_b);
+
+            for (; m_last_alloc != save_b;)
+                alloc.destroy(--m_last_alloc);
+            
+            return b;
+        }
+    }
+    catch(const char* excp)
+    {
+        std::cerr << excp << '\n';
 
         free();
         exit(EXIT_FAILURE);
